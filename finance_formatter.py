@@ -1,4 +1,7 @@
 import pandas as pd
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from categories import GROCERY, CAR_FUEL, HOBBY_SPORT, RESTAURANTS, DEVELOPMENT, GIFT, EXCLUDE_KEYWORDS, EXCLUDE_AMOUNTS, EXCLUDE_KEYWORD_AMOUNT
 
 def categorize(description):
@@ -17,7 +20,7 @@ def categorize(description):
         return 'Gift'
     return 'Other'
 
-df = pd.read_excel('1.xlsx')
+df = pd.read_excel('/Users/apochynok/Downloads/1.xlsx')
 df = df.rename(columns={'Data transakcji': 'Date', 'Opis': 'Description', 'Kwota': 'Amount'})
 df['Description'] = df['Description'].str.strip()
 df['Amount'] = pd.to_numeric(df['Amount'])

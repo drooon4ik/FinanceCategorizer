@@ -1,8 +1,8 @@
-GROCERY = ['lidl', 'rossmann', 'allegro']
-CAR_FUEL = ['stacja paliw', 'parkowanie', 'parking', 'strefy platnego', 'brzeczkowice manual', 'balice manual']
+GROCERY = ['lidl', 'rossmann', 'juhas grzegorzek', 'auchan']
+CAR_FUEL = ['orlen', 'stacja paliw', 'parkowanie', 'parking', 'strefy platnego', 'brzeczkowice manual', 'balice manual']
 HOBBY_SPORT = ['hotel', 'booking', 'ryanair']
 RESTAURANTS = ['mcdonalds', 'lunch']
-DEVELOPMENT = ['time building', 'licencji', 'apple.com']
+DEVELOPMENT = ['time building', 'licencji']
 GIFT = ['kwiatów', 'birthday']
 
 # Filters to exclude transactions
