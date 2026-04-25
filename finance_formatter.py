@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from categories import GROCERY, CAR_FUEL, HOBBY_SPORT, RESTAURANTS, DEVELOPMENT, GIFT, EXCLUDE_KEYWORDS, EXCLUDE_AMOUNTS, EXCLUDE_KEYWORD_AMOUNT
+from categories import GROCERY, CAR_FUEL, RESTAURANTS, DEVELOPMENT, GIFT, CLOTHES, EXCLUDE_KEYWORDS, EXCLUDE_AMOUNTS, EXCLUDE_KEYWORD_AMOUNT
 
 def categorize(description):
     desc = description.lower()
@@ -10,14 +10,14 @@ def categorize(description):
         return 'Grocery'
     if any(k in desc for k in CAR_FUEL):
         return 'Car&Fuel'
-    if any(k in desc for k in HOBBY_SPORT):
-        return 'Hobby/sport/Rest/Entertaiment'
     if any(k in desc for k in RESTAURANTS):
         return 'Restorans'
     if any(k in desc for k in DEVELOPMENT):
         return 'Development'
     if any(k in desc for k in GIFT):
         return 'Gift'
+    if any(k in desc for k in CLOTHES):
+        return 'Clothes'
     return 'Other'
 
 df = pd.read_excel('/Users/apochynok/Downloads/1.xlsx')
@@ -46,7 +46,7 @@ def make_formula(amounts):
 
 pivot = df.groupby(['Date', 'Category'])['Amount'].apply(make_formula).unstack(fill_value='')
 pivot = pivot.reindex(date_range, fill_value='')
-cols = ['Grocery', 'Car&Fuel', 'Hobby/sport/Rest/Entertaiment', 'Restorans', 'Other', 'Clothes', 'Development', 'Gift']
+cols = ['Grocery', 'Car&Fuel', 'Restorans', 'Other', 'Clothes', 'Development', 'Gift']
 for col in cols:
     if col not in pivot.columns:
         pivot[col] = ''

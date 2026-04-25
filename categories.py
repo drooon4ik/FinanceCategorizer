@@ -1,9 +1,9 @@
-GROCERY = ['lidl', 'rossmann', 'juhas grzegorzek', 'auchan']
-CAR_FUEL = ['orlen', 'stacja paliw', 'parkowanie', 'parking', 'strefy platnego', 'brzeczkowice manual', 'balice manual']
-HOBBY_SPORT = ['hotel', 'booking', 'ryanair']
-RESTAURANTS = ['mcdonalds', 'lunch']
+GROCERY = ['lidl', 'rossmann', 'juhas grzegorzek', 'auchan', 'przejscie podziemne', 'fh juhas grzego', 'trokos']
+CAR_FUEL = ['orlen', 'stacja paliw', 'parkowanie', 'parking', 'strefy platnego', 'brzeczkowice manual', 'auto myjnia', 'balice',  'galeria krakowska park']
+RESTAURANTS = ['hotel', 'booking', 'ryanair', 'mcdonalds', 'lunch', 'hala centralna']
 DEVELOPMENT = ['time building', 'licencji']
-GIFT = ['kwiatów', 'birthday']
+GIFT = ['kwiatów', 'birthday', 'monika urban czarokwia']
+CLOTHES = ['peek cloppenburg', 'reserved']
 
 # Filters to exclude transactions
 EXCLUDE_KEYWORDS = ['pit-', 'urząd skarbowy', 'podatkowy', 'money transfer']
