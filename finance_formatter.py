@@ -1,6 +1,7 @@
 import pandas as pd
 import sys
 import os
+import subprocess
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from categories import GROCERY, CAR_FUEL, RESTAURANTS, DEVELOPMENT, GIFT, CLOTHES, EXCLUDE_KEYWORDS, EXCLUDE_AMOUNTS, EXCLUDE_KEYWORD_AMOUNT
 
@@ -51,4 +52,8 @@ for col in cols:
     if col not in pivot.columns:
         pivot[col] = ''
 pivot = pivot[cols]
-print(pivot.to_csv(sep='\t', index=False))
+result = pivot.to_csv(sep='\t', index=False)
+print(result)
+data_without_header = '\n'.join(result.split('\n')[1:])
+subprocess.run('pbcopy', input=data_without_header.encode(), check=True)
+print('\n✅ Copied to clipboard!')
