@@ -33,9 +33,10 @@ for amount in EXCLUDE_AMOUNTS:
 df['Amount'] = df['Amount'] * -1
 df['Category'] = df['Description'].apply(categorize)
 df['Date'] = pd.to_datetime(df['Date']).dt.date
-min_date = df['Date'].min()
-start_date = min_date.replace(day=1)
-date_range = pd.date_range(start_date, df['Date'].max(), freq='D').date
+last_date = df['Date'].max()
+start_date = last_date.replace(day=1)
+df = df[df['Date'] >= start_date]
+date_range = pd.date_range(start_date, last_date, freq='D').date
 
 def make_formula(amounts):
     amounts = [a for a in amounts if a != 0]

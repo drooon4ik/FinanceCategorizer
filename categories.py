@@ -1,7 +1,7 @@
 GROCERY = ['lidl', 'rossmann', 'juhas grzegorzek', 'auchan', 'przejscie podziemne', 'fh juhas grzego', 'trokos', 'kaufland']
 CAR_FUEL = ['orlen', 'stacja paliw', 'parkowanie', 'parking', 'strefy platnego', 'brzeczkowice manual', 'auto myjnia', 'balice',  'galeria krakowska park']
 RESTAURANTS = ['hotel', 'booking', 'ryanair', 'mcdonalds', 'lunch', 'hala centralna']
-DEVELOPMENT = ['time building', 'licencji']
+DEVELOPMENT = ['time building', 'licencji', 'perfect line']
 GIFT = ['kwiatów', 'birthday', 'monika urban czarokwia']
 CLOTHES = ['peek cloppenburg', 'reserved']
 
