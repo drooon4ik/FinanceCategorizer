@@ -3,7 +3,7 @@ import sys
 import os
 import subprocess
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from categories import GROCERY, CAR_FUEL, RESTAURANTS, DEVELOPMENT, GIFT, CLOTHES, EXCLUDE_KEYWORDS, EXCLUDE_AMOUNTS, EXCLUDE_KEYWORD_AMOUNT
+from categories import GROCERY, CAR_FUEL, RESTAURANTS, DEVELOPMENT, GIFT, CLOTHES, EXCLUDE_KEYWORDS, EXCLUDE_AMOUNTS, EXCLUDE_KEYWORD_AMOUNT, EXCLUDE_ACCOUNTS
 
 def categorize(description):
     desc = description.lower()
@@ -22,6 +22,9 @@ def categorize(description):
     return 'Other'
 
 df = pd.read_excel('/Users/apochynok/Downloads/1.xlsx')
+df = df[~df['Produkt'].str.contains('78160014621736641320000007', na=False)]
+df = df[~df['Odbiorca'].str.contains('|'.join(EXCLUDE_ACCOUNTS), na=False)]
+df = df[~(df['Nadawca'].str.contains('16160014621736641340000001', na=False) & df['Odbiorca'].str.contains('46160014621736641320000001', na=False))]
 df = df.rename(columns={'Data transakcji': 'Date', 'Opis': 'Description', 'Kwota': 'Amount'})
 df['Description'] = df['Description'].str.strip()
 df['Amount'] = pd.to_numeric(df['Amount'])
@@ -34,9 +37,13 @@ df['Amount'] = df['Amount'] * -1
 df['Category'] = df['Description'].apply(categorize)
 df['Date'] = pd.to_datetime(df['Date']).dt.date
 last_date = df['Date'].max()
-start_date = last_date.replace(day=1)
+start_day = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() and 1 <= int(sys.argv[1]) <= 31 else 1
+from datetime import date as date_cls
+import calendar
+start_date = last_date.replace(day=start_day)
+end_date = last_date.replace(day=calendar.monthrange(last_date.year, last_date.month)[1])
 df = df[df['Date'] >= start_date]
-date_range = pd.date_range(start_date, last_date, freq='D').date
+date_range = pd.date_range(start_date, end_date, freq='D').date
 
 def make_formula(amounts):
     amounts = [a for a in amounts if a != 0]
