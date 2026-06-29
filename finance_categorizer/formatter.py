@@ -80,10 +80,15 @@ def main():
     pivot = pivot[COLS]
     result = pivot.to_csv(sep='\t', index=False)
 
-    # Display with day numbers
+    # Display with day numbers, aligned columns
     display_pivot = pivot.copy()
     display_pivot.insert(0, 'Day', [d.day for d in display_pivot.index])
-    print(display_pivot.to_csv(sep='\t', index=False))
+    col_widths = {col: max(len(col), display_pivot[col].astype(str).str.len().max()) for col in display_pivot.columns}
+    header = '  '.join(col.ljust(col_widths[col]) for col in display_pivot.columns)
+    print(header)
+    for _, row in display_pivot.iterrows():
+        line = '  '.join(str(row[col]).ljust(col_widths[col]) for col in display_pivot.columns)
+        print(line)
 
     data_without_header = '\n'.join(result.split('\n')[1:])
     subprocess.run('pbcopy', input=data_without_header.encode(), check=True)
