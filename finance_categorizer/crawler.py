@@ -24,12 +24,18 @@ PASSWORD = os.environ["BANK_PASSWORD"]
 DOWNLOAD_PATH = Path.home() / "Downloads" / "1.xlsx"
 
 
+def status(msg):
+    sys.stdout.write(f"\r\033[K⏳ {msg}")
+    sys.stdout.flush()
+
+
 def run(headless=True):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=headless)
         context = browser.new_context(accept_downloads=True)
         page = context.new_page()
 
+        status("Открываю страницу логина...")
         page.goto("https://goonline.bnpparibas.pl/login")
 
         # Dismiss cookie popup
@@ -39,11 +45,13 @@ def run(headless=True):
             pass
 
         # Step 1: enter login
+        status("Ввожу логин...")
         page.locator("#id-username").wait_for(state="visible", timeout=15000)
         page.locator("#id-username").fill(LOGIN)
         page.locator('button[type="submit"]').first.click()
 
         # Step 2: enter password
+        status("Ввожу пароль...")
         page.locator("#password-input").wait_for(state="visible", timeout=15000)
         page.locator("#password-input").fill(PASSWORD)
         page.locator('button[type="submit"]').first.click()
@@ -55,17 +63,19 @@ def run(headless=True):
             pass
 
         # Navigate to Historia
+        status("Перехожу в Историю...")
         page.locator('a:has-text("Historia"), button:has-text("Historia")').first.wait_for(state="visible", timeout=15000)
         page.locator('a:has-text("Historia"), button:has-text("Historia")').first.click()
 
         # Download XLS
+        status("Скачиваю отчёт...")
         download_btn = page.locator('button:has-text("Pobierz historię do pliku XLS")')
         download_btn.wait_for(state="visible", timeout=15000)
         with page.expect_download(timeout=30000) as download_info:
             download_btn.click()
         download = download_info.value
         download.save_as(DOWNLOAD_PATH)
-        print(f"📥 Downloaded: {DOWNLOAD_PATH}")
+        print(f"\r\033[K📥 Downloaded: {DOWNLOAD_PATH}")
 
         browser.close()
 
