@@ -7,6 +7,7 @@
 ```
 finance_categorizer/
 ├── __init__.py
+├── cli.py               # Единая точка входа (флаги -d, -e)
 ├── crawler.py           # Playwright краулер для скачивания xlsx
 ├── formatter.py         # Сводная таблица по дням/категориям
 ├── detail.py            # Детальный просмотр транзакций
@@ -33,28 +34,25 @@ BANK_PASSWORD=your_password
 finance           # скачать xlsx (кеш 3ч) + сводная таблица
 finance 15        # с 15-го числа
 finance -f        # принудительно перекачать xlsx
+finance -p        # сводная таблица за предыдущий месяц
+finance -p 10     # за предыдущий месяц с 10-го числа
 ```
 
 ### Детальный просмотр
 
 ```bash
-financed 15            # все транзакции за 15-е число
-financed Grocery       # все Grocery за текущий месяц
-financed 15 Grocery    # Grocery за 15-е
+finance -d 15            # все транзакции за 15-е число
+finance -d Grocery       # все Grocery за текущий месяц
+finance -d 15 Grocery    # Grocery за 15-е
+finance -d -p            # все транзакции за предыдущий месяц
+finance -d -p Grocery    # Grocery за предыдущий месяц
+finance -d -p 15         # транзакции за 15-е предыдущего месяца
 ```
 
 ### Редактирование категорий
 
 ```bash
-financee "keyword" Rest      # добавить keyword в категорию Rest
-```
-
-### Только скачать xlsx
-
-```bash
-financec            # скачать (с кешем 3ч)
-financec -f         # принудительно
-financec --debug    # с видимым браузером
+finance -e "keyword" Rest      # добавить keyword в категорию Rest
 ```
 
 ## Категории

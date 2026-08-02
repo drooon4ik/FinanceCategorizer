@@ -14,10 +14,11 @@ CATEGORIES_FILE = Path(__file__).parent / "categories.py"
 CATEGORY_TO_VAR = {
     'Grocery': 'GROCERY',
     'Car&Fuel': 'CAR_FUEL',
-    'Rest': 'RESTAURANTS',
-    'Development': 'DEVELOPMENT',
+    'Hobby/Rest/Entertainment': 'RESTAURANTS',
+    'Development/Sport': 'DEVELOPMENT',
     'Gift': 'GIFT',
     'Clothes': 'CLOTHES',
+    'Subscriptions': 'SUBSCRIPTIONS',
 }
 
 

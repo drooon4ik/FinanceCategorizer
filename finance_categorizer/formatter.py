@@ -3,6 +3,7 @@ Format transactions from xlsx into categorized daily table.
 
 Usage:
     python3 -m finance_categorizer.formatter [start_day]
+    python3 -m finance_categorizer.formatter -p          # previous month
 
 Copies result to clipboard (macOS).
 """
@@ -10,26 +11,30 @@ Copies result to clipboard (macOS).
 import calendar
 import subprocess
 import sys
+from datetime import timedelta
 
 import pandas as pd
 
 from finance_categorizer.categories import (
-    GROCERY, CAR_FUEL, RESTAURANTS, DEVELOPMENT, GIFT, CLOTHES,
+    CATEGORY_RULES, COLS,
     EXCLUDE_KEYWORDS, EXCLUDE_AMOUNTS, EXCLUDE_KEYWORD_AMOUNT, EXCLUDE_ACCOUNTS
 )
 
 XLSX_PATH = '/Users/apochynok/Downloads/1.xlsx'
-COLS = ['Grocery', 'Car&Fuel', 'Rest', 'Other', 'Clothes', 'Development', 'Gift']
 
 
-def categorize(description):
+def categorize(description, odbiorca, amount):
     desc = description.lower()
-    if any(k in desc for k in GROCERY): return 'Grocery'
-    if any(k in desc for k in CAR_FUEL): return 'Car&Fuel'
-    if any(k in desc for k in RESTAURANTS): return 'Rest'
-    if any(k in desc for k in DEVELOPMENT): return 'Development'
-    if any(k in desc for k in GIFT): return 'Gift'
-    if any(k in desc for k in CLOTHES): return 'Clothes'
+    odb = str(odbiorca).lower() if pd.notna(odbiorca) else ''
+    for category, rules in CATEGORY_RULES:
+        for rule in rules:
+            if isinstance(rule, tuple):
+                keyword, rule_amount = rule
+                if (keyword in desc or keyword in odb) and round(amount, 2) == rule_amount:
+                    return category
+            else:
+                if rule in desc:
+                    return category
     return 'Other'
 
 
@@ -53,23 +58,35 @@ def main():
     df['Amount'] = pd.to_numeric(df['Amount'])
     df = df[~df['Description'].str.lower().str.contains('|'.join(EXCLUDE_KEYWORDS), na=False)]
     for keyword, amount in EXCLUDE_KEYWORD_AMOUNT:
-        df = df[~((df['Description'].str.lower().str.contains(keyword, na=False)) & (df['Amount'].round(2) == -amount))]
+        matches_keyword = (
+            df['Description'].str.lower().str.contains(keyword, na=False) |
+            df['Odbiorca'].str.lower().str.contains(keyword, na=False)
+        )
+        df = df[~(matches_keyword & (df['Amount'].round(2) == -amount))]
     for amount in EXCLUDE_AMOUNTS:
         df = df[df['Amount'].round(2) != -amount]
     df['Amount'] = df['Amount'] * -1
-    df['Category'] = df['Description'].apply(categorize)
+    df['Category'] = df.apply(lambda r: categorize(r['Description'], r['Odbiorca'], r['Amount']), axis=1)
     df['Date'] = pd.to_datetime(df['Date']).dt.date
 
     last_date = df['Date'].max()
+    prev_month = '-p' in sys.argv
     start_day = 1
     for arg in sys.argv[1:]:
         if arg.isdigit() and 1 <= int(arg) <= 31:
             start_day = int(arg)
             break
 
-    start_date = last_date.replace(day=start_day)
-    end_date = last_date.replace(day=calendar.monthrange(last_date.year, last_date.month)[1])
-    df = df[df['Date'] >= start_date]
+    if prev_month:
+        first_of_current = last_date.replace(day=1)
+        end_of_prev = first_of_current - timedelta(days=1)
+        start_date = end_of_prev.replace(day=start_day)
+        end_date = end_of_prev
+        df = df[(df['Date'] >= start_date) & (df['Date'] <= end_date)]
+    else:
+        start_date = last_date.replace(day=start_day)
+        end_date = last_date
+        df = df[df['Date'] >= start_date]
     date_range = pd.date_range(start_date, end_date, freq='D').date
 
     pivot = df.groupby(['Date', 'Category'])['Amount'].apply(make_formula).unstack(fill_value='')
