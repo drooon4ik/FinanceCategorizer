@@ -1,63 +1,59 @@
 """
-Add a keyword to a category.
+Add a keyword to a category (stored as temporary rule).
 
 Usage:
-    python3 -m finance_categorizer.category_edit "keyword" Category
+    finance -e "keyword" Category
+    finance -e "keyword" 5.00 Category
 """
 
-import re
 import sys
-from pathlib import Path
 
-CATEGORIES_FILE = Path(__file__).parent / "categories.py"
+from finance_categorizer.categories import CATEGORY_RULES
+from finance_categorizer.temp_rules import add
 
-CATEGORY_TO_VAR = {
-    'Grocery': 'GROCERY',
-    'Car&Fuel': 'CAR_FUEL',
-    'Hobby/Rest/Entertainment': 'RESTAURANTS',
-    'Development/Sport': 'DEVELOPMENT',
-    'Gift': 'GIFT',
-    'Clothes': 'CLOTHES',
-    'Subscriptions': 'SUBSCRIPTIONS',
-}
+CATEGORIES = [cat for cat, _ in CATEGORY_RULES]
 
 
 def main():
-    if len(sys.argv) != 3:
-        print('Usage: financee "keyword" Category')
-        print(f"Categories: {', '.join(CATEGORY_TO_VAR.keys())}")
+    args = sys.argv[1:]
+
+    if len(args) < 2 or len(args) > 3:
+        print('Usage: finance -e "keyword" Category')
+        print('       finance -e "keyword" 5.00 Category')
+        print(f"Categories: {', '.join(CATEGORIES)}")
         sys.exit(1)
 
-    keyword = sys.argv[1].lower().strip()
-    category = sys.argv[2]
+    keyword = args[0].lower().strip()
 
-    match = {k.lower(): k for k in CATEGORY_TO_VAR}
-    if category.lower() not in match:
-        print(f"❌ Unknown category: {category}")
-        print(f"Available: {', '.join(CATEGORY_TO_VAR.keys())}")
+    # Parse: "keyword" amount Category  OR  "keyword" Category
+    if len(args) == 3:
+        try:
+            amount = float(args[1])
+        except ValueError:
+            print(f"❌ Invalid amount: {args[1]}")
+            sys.exit(1)
+        category_input = args[2]
+    else:
+        amount = None
+        category_input = args[1]
+
+    # Match category (case-insensitive)
+    match = {c.lower(): c for c in CATEGORIES}
+    if category_input.lower() not in match:
+        print(f"❌ Unknown category: {category_input}")
+        print(f"Available: {', '.join(CATEGORIES)}")
         sys.exit(1)
-    category = match[category.lower()]
-    var_name = CATEGORY_TO_VAR[category]
+    category = match[category_input.lower()]
 
-    content = CATEGORIES_FILE.read_text()
-
-    pattern = rf"^({var_name}\s*=\s*\[)(.*)(\])$"
-    m = re.search(pattern, content, re.MULTILINE)
-    if not m:
-        print(f"❌ Could not find {var_name} in {CATEGORIES_FILE.name}")
+    ok, msg = add(keyword, category, amount)
+    if ok:
+        if amount is not None:
+            print(f"✅ Added '{keyword}' ({amount}) → {category} [temp]")
+        else:
+            print(f"✅ Added '{keyword}' → {category} [temp]")
+    else:
+        print(f"❌ {msg}")
         sys.exit(1)
-
-    existing = [s.strip().strip("'\"") for s in m.group(2).split(',') if s.strip()]
-    if keyword in existing:
-        print(f"❌ '{keyword}' already exists in {category}")
-        sys.exit(1)
-
-    existing.append(keyword)
-    new_list = ', '.join(f"'{k}'" for k in existing)
-    new_line = f"{var_name} = [{new_list}]"
-    content = content[:m.start()] + new_line + content[m.end():]
-    CATEGORIES_FILE.write_text(content)
-    print(f"✅ Added '{keyword}' → {category}")
 
 
 if __name__ == "__main__":

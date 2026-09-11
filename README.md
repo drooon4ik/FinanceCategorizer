@@ -7,11 +7,12 @@
 ```
 finance_categorizer/
 ├── __init__.py
-├── cli.py               # Единая точка входа (флаги -d, -e)
+├── cli.py               # Единая точка входа (флаги -d, -e, -i)
 ├── crawler.py           # Playwright краулер для скачивания xlsx
 ├── formatter.py         # Сводная таблица по дням/категориям
 ├── detail.py            # Детальный просмотр транзакций
 ├── category_edit.py     # Редактирование категорий
+├── ignore_edit.py       # Временное игнорирование транзакций
 └── categories.py        # Категории и фильтры
 ```
 
@@ -52,7 +53,14 @@ finance -d -p 15         # транзакции за 15-е предыдущег�
 ### Редактирование категорий
 
 ```bash
-finance -e "keyword" Rest      # добавить keyword в категорию Rest
+finance -e "keyword" Rest      # добавить keyword в категорию Rest (temp, 2 месяца)
+```
+
+### Временное игнорирование транзакций
+
+```bash
+finance -i "keyword"           # игнорировать транзакции с keyword (temp, 2 месяца)
+finance -i "keyword" 5.00      # игнорировать по keyword + сумме
 ```
 
 ## Категории

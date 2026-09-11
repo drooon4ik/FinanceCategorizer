@@ -19,6 +19,7 @@ from finance_categorizer.categories import (
     CATEGORY_RULES, COLS,
     EXCLUDE_KEYWORDS, EXCLUDE_AMOUNTS, EXCLUDE_KEYWORD_AMOUNT, EXCLUDE_ACCOUNTS
 )
+from finance_categorizer.temp_rules import get_category_rules, get_ignore_rules
 
 XLSX_PATH = '/Users/apochynok/Downloads/1.xlsx'
 CATEGORIES = COLS
@@ -27,7 +28,8 @@ CATEGORIES = COLS
 def categorize(description, odbiorca, amount):
     desc = description.lower()
     odb = str(odbiorca).lower() if pd.notna(odbiorca) else ''
-    for category, rules in CATEGORY_RULES:
+    all_rules = get_category_rules() + CATEGORY_RULES
+    for category, rules in all_rules:
         for rule in rules:
             if isinstance(rule, tuple):
                 keyword, rule_amount = rule
@@ -75,6 +77,17 @@ def main():
         df = df[~(matches_keyword & (df['Amount'].round(2) == -amount))]
     for amount in EXCLUDE_AMOUNTS:
         df = df[df['Amount'].round(2) != -amount]
+    # Apply temp ignore rules
+    for rule in get_ignore_rules():
+        keyword = rule["keyword"]
+        matches_keyword = (
+            df['Description'].str.lower().str.contains(keyword, na=False) |
+            df['Odbiorca'].str.lower().str.contains(keyword, na=False)
+        )
+        if "amount" in rule:
+            df = df[~(matches_keyword & (df['Amount'].round(2) == -rule["amount"]))]
+        else:
+            df = df[~matches_keyword]
     df['Amount'] = df['Amount'] * -1
     df['Category'] = df.apply(lambda r: categorize(r['Description'], r['Odbiorca'], r['Amount']), axis=1)
     df['Date'] = pd.to_datetime(df['Date']).dt.date
